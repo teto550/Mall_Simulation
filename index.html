@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سجل المجموعات</title>
+<meta name="theme-color" content="#0F3D3E">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المجموعات">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F3D3E;
+    --ink-2:#123f40;
+    --paper:#F4F2ED;
+    --card:#FFFFFF;
+    --gold:#C9A227;
+    --gold-2:#a9861a;
+    --line:#E1DED4;
+    --text:#1C2626;
+    --muted:#6B7573;
+    --danger:#B3452C;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+    padding-bottom:96px;
+  }
+  .num{font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums;}
+
+  header.top{
+    background:linear-gradient(160deg, var(--ink) 0%, var(--ink-2) 60%, #0b2e2f 100%);
+    color:#F4F2ED;
+    padding:28px 20px 34px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.top::after{
+    content:"";
+    position:absolute;
+    left:-40px; top:-40px;
+    width:180px; height:180px;
+    border-radius:50%;
+    border:2px solid rgba(201,162,39,.25);
+  }
+  header.top::before{
+    content:"";
+    position:absolute;
+    right:-60px; bottom:-70px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(201,162,39,.15) 0%, transparent 70%);
+  }
+  header.top h1{
+    margin:0 0 4px;
+    font-weight:900;
+    font-size:26px;
+    letter-spacing:.3px;
+  }
+  header.top p{
+    margin:0;
+    color:#c9d6d5;
+    font-size:14px;
+  }
+  .stats{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    position:relative;
+    z-index:1;
+  }
+  .stat{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(201,162,39,.3);
+    border-radius:12px;
+    padding:10px 14px;
+    flex:1;
+    text-align:center;
+  }
+  .stat .n{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:20px; color:var(--gold);}
+  .stat .l{font-size:11px; color:#c9d6d5; margin-top:2px;}
+
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:18px 16px 0;
+  }
+
+  .swap-banner{
+    display:none;
+    background:#fff;
+    border:1px solid var(--gold);
+    border-right:4px solid var(--gold);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:14px;
+    font-size:13.5px;
+    color:var(--ink);
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .swap-banner.show{display:block;}
+  .swap-banner b{color:var(--gold-2);}
+
+  .add-form{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .add-form h2{
+    font-size:14px;
+    margin:0 0 12px;
+    color:var(--muted);
+    font-weight:700;
+  }
+  .form-row{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  input{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    padding:11px 12px;
+    font-size:15px;
+    font-family:'Tajawal',sans-serif;
+    background:#FBFAF7;
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s;
+  }
+  input.num-input{font-family:'JetBrains Mono',monospace; text-align:center;}
+  input:focus{border-color:var(--gold);}
+  input::placeholder{color:#a7ada9; font-size:13px;}
+
+  .btn{
+    border:none;
+    border-radius:10px;
+    padding:12px 16px;
+    font-family:'Tajawal',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:transform .1s, opacity .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{
+    background:var(--ink);
+    color:#fff;
+    width:100%;
+  }
+  .btn-primary:hover{background:var(--ink-2);}
+
+  .list-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .list-head h2{
+    font-size:14px;
+    color:var(--muted);
+    font-weight:700;
+    margin:0;
+  }
+  .clear-link{
+    font-size:12.5px;
+    color:var(--danger);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Tajawal',sans-serif;
+    text-decoration:underline;
+  }
+
+  .empty{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .empty .emoji{font-size:34px; display:block; margin-bottom:8px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .card.matched{
+    border-color:var(--swap-color, var(--gold));
+    border-width:1.5px;
+    background:color-mix(in srgb, var(--swap-color, var(--gold)) 6%, white);
+  }
+  .card .dot{
+    width:10px;
+    height:44px;
+    border-radius:6px;
+    background:#E1DED4;
+    flex-shrink:0;
+  }
+  .card.matched .dot{
+    background:var(--swap-color, var(--gold));
+  }
+  .card .info{flex:1; min-width:0;}
+  .card .name{
+    font-weight:700;
+    font-size:16px;
+    color:var(--text);
+    margin-bottom:4px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card .groups{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:26px;
+    padding:2px 7px;
+    border-radius:7px;
+    background:#EFEDE6;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .chip.to{
+    background:#FBF3DE;
+    color:var(--gold-2);
+  }
+  .arrow{color:#c2c7c4; font-size:13px;}
+  .card .swap-tag{
+    font-size:11px;
+    margin-top:5px;
+    color:var(--swap-color, var(--gold-2));
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .card .swap-tag .sw-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--swap-color, var(--gold));
+    display:inline-block;
+  }
+  .del-btn{
+    background:none;
+    border:none;
+    color:#b7bcb9;
+    font-size:20px;
+    cursor:pointer;
+    padding:4px 6px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .del-btn:hover{color:var(--danger);}
+
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:11.5px;
+    color:#a7ada9;
+  }
+
+  @media (max-width:380px){
+    .form-row{grid-template-columns:1fr 1fr; }
+    .form-row input:first-child{grid-column:1 / -1;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>سجل المجموعات</h1>
+  <p>اكتب الأولاد ومجموعاتهم، وهيبان لك التبديلات المناسبة أوتوماتيك</p>
+  <div class="stats">
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">ولد</div></div>
+    <div class="stat"><div class="n" id="statSwaps">0</div><div class="l">فرصة تبديل</div></div>
+    <div class="stat"><div class="n" id="statGroups">0</div><div class="l">مجموعة</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="swap-banner" id="swapBanner"></div>
+
+  <div class="add-form">
+    <h2>إضافة ولد</h2>
+    <div class="form-row">
+      <input type="text" id="inName" placeholder="اسم الولد">
+      <input type="number" id="inCurrent" class="num-input" placeholder="مجموعته" inputmode="numeric">
+      <input type="number" id="inWanted" class="num-input" placeholder="عايز يروح" inputmode="numeric">
+    </div>
+    <button class="btn btn-primary" onclick="addChild()">إضافة</button>
+  </div>
+
+  <div class="list-head">
+    <h2 id="listTitle">القائمة</h2>
+    <button class="clear-link" onclick="clearAll()">مسح الكل</button>
+  </div>
+
+  <div id="list"></div>
+</main>
+
+<footer>البيانات محفوظة على جهازك فقط</footer>
+
+<script>
+const STORAGE_KEY = 'group-swap-children-v1';
+const PALETTE = ['#C9452C','#2C6E7A','#8A5FC2','#3D8B3D','#C77B2E','#B23F84','#2E6FB2','#7A7A2E'];
+
+let children = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(children));
+}
+
+function addChild(){
+  const name = document.getElementById('inName').value.trim();
+  const cur = document.getElementById('inCurrent').value.trim();
+  const want = document.getElementById('inWanted').value.trim();
+  if(!name || cur==='' || want===''){
+    flashInvalid();
+    return;
+  }
+  children.push({
+    id: Date.now() + Math.random().toString(16).slice(2),
+    name, current: cur, wanted: want
+  });
+  save();
+  document.getElementById('inName').value='';
+  document.getElementById('inCurrent').value='';
+  document.getElementById('inWanted').value='';
+  document.getElementById('inName').focus();
+  render();
+}
+
+function flashInvalid(){
+  const form = document.querySelector('.add-form');
+  form.style.borderColor = '#B3452C';
+  setTimeout(()=>{ form.style.borderColor = 'var(--line)'; }, 500);
+}
+
+function removeChild(id){
+  children = children.filter(c => c.id !== id);
+  save();
+  render();
+}
+
+function clearAll(){
+  if(children.length===0) return;
+  if(confirm('هيتم مسح كل الأسماء، متأكد؟')){
+    children = [];
+    save();
+    render();
+  }
+}
+
+// -- Cycle detection among group numbers --
+// Build directed graph: edge current -> wanted for every child where current != wanted
+// Find elementary cycles, assign a color per cycle, then tag every child whose
+// (current, wanted) edge belongs to that cycle.
+function findSwapGroups(){
+  const edges = []; // {from, to, children:[ids]}
+  const edgeMap = new Map();
+  children.forEach(c=>{
+    if(c.current === '' || c.wanted === '' || String(c.current) === String(c.wanted)) return;
+    const key = c.current + '->' + c.wanted;
+    if(!edgeMap.has(key)){
+      edgeMap.set(key, {from:c.current, to:c.wanted, ids:[]});
+    }
+    edgeMap.get(key).ids.push(c.id);
+  });
+  const edgeList = Array.from(edgeMap.values());
+  if(edgeList.length===0) return [];
+
+  // adjacency: group -> list of edge indices going out
+  const adj = new Map();
+  edgeList.forEach((e,i)=>{
+    if(!adj.has(e.from)) adj.set(e.from, []);
+    adj.get(e.from).push(i);
+  });
+
+  const foundCycles = []; // arrays of edge indices
+  const usedEdgeSets = new Set();
+
+  edgeList.forEach((startEdge, startIdx)=>{
+    // DFS from startEdge.to back to startEdge.from
+    const stack = [[startEdge.to, [startIdx]]];
+    const visitedGroupsInPath = new Set([startEdge.from]);
+    function dfs(node, path, visited){
+      if(path.length > 12) return; // safety cap
+      const outs = adj.get(node) || [];
+      for(const eIdx of outs){
+        const e = edgeList[eIdx];
+        if(e.to === startEdge.from){
+          const cyclePath = [...path, eIdx];
+          const key = cyclePath.slice().sort((a,b)=>a-b).join(',');
+          if(!usedEdgeSets.has(key)){
+            usedEdgeSets.add(key);
+            foundCycles.push(cyclePath);
+          }
+        } else if(!visited.has(e.to)){
+          visited.add(e.to);
+          dfs(e.to, [...path, eIdx], visited);
+          visited.delete(e.to);
+        }
+      }
+    }
+    dfs(startEdge.to, [startIdx], new Set([startEdge.from, startEdge.to]));
+  });
+
+  // Map each edge to the smallest cycle it participates in (prefer 2-cycles / direct swaps)
+  foundCycles.sort((a,b)=>a.length-b.length);
+  const edgeToCycle = new Map();
+  foundCycles.forEach(cycle=>{
+    cycle.forEach(eIdx=>{
+      if(!edgeToCycle.has(eIdx)) edgeToCycle.set(eIdx, cycle);
+    });
+  });
+
+  // group cycles uniquely (by identity of cycle array)
+  const uniqueCycles = [];
+  const seen = new Set();
+  edgeToCycle.forEach(cycle=>{
+    const key = cycle.slice().sort((a,b)=>a-b).join(',');
+    if(!seen.has(key)){ seen.add(key); uniqueCycles.push(cycle); }
+  });
+
+  return uniqueCycles.map((cycle, i)=>{
+    const color = PALETTE[i % PALETTE.length];
+    const ids = new Set();
+    const groups = [];
+    cycle.forEach(eIdx=>{
+      edgeList[eIdx].ids.forEach(id=>ids.add(id));
+      groups.push(edgeList[eIdx].from + '→' + edgeList[eIdx].to);
+    });
+    return {color, ids, size: cycle.length, groups};
+  });
+}
+
+function render(){
+  const list = document.getElementById('list');
+  const swaps = findSwapGroups();
+
+  // build id -> swap info map
+  const idColor = new Map();
+  swaps.forEach(s=>{
+    s.ids.forEach(id=>idColor.set(id, s));
+  });
+
+  document.getElementById('statTotal').textContent = children.length;
+  document.getElementById('statSwaps').textContent = swaps.length;
+  const groupSet = new Set();
+  children.forEach(c=>{ if(c.current!=='') groupSet.add(String(c.current)); if(c.wanted!=='') groupSet.add(String(c.wanted)); });
+  document.getElementById('statGroups').textContent = groupSet.size;
+
+  document.getElementById('listTitle').textContent = `القائمة (${children.length})`;
+
+  const banner = document.getElementById('swapBanner');
+  if(swaps.length>0){
+    const pairSwaps = swaps.filter(s=>s.size===2).length;
+    const chainSwaps = swaps.length - pairSwaps;
+    let msg = `<b>${swaps.length}</b> فرصة تبديل متاحة`;
+    if(chainSwaps>0) msg += ` (منها ${chainSwaps} تبديل دائري بين أكتر من مجموعتين)`;
+    banner.innerHTML = msg;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  if(children.length===0){
+    list.innerHTML = `<div class="empty"><span class="emoji">📋</span>لسه معملتش أي إضافة<br>ابدأ بإضافة أول ولد فوق</div>`;
+    return;
+  }
+
+  list.innerHTML = children.map(c=>{
+    const info = idColor.get(c.id);
+    const matched = !!info;
+    const style = matched ? `style="--swap-color:${info.color}"` : '';
+    let tag = '';
+    if(matched){
+      const label = info.size===2 ? 'ينفع يتبدل مع حد تاني' : `تبديل دائري بين ${info.size} مجموعات`;
+      tag = `<div class="swap-tag"><span class="sw-dot"></span>${label}</div>`;
+    }
+    return `
+      <div class="card ${matched?'matched':''}" ${style}>
+        <div class="dot"></div>
+        <div class="info">
+          <div class="name">${escapeHtml(c.name)}</div>
+          <div class="groups">
+            <span class="chip">${escapeHtml(String(c.current))}</span>
+            <span class="arrow">→</span>
+            <span class="chip to">${escapeHtml(String(c.wanted))}</span>
+          </div>
+          ${tag}
+        </div>
+        <button class="del-btn" onclick="removeChild('${c.id}')" aria-label="حذف">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+// allow Enter key to submit from any field
+['inName','inCurrent','inWanted'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e=>{
+    if(e.key==='Enter') addChild();
+  });
+});
+
+render();
+
+// register service worker for installability
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
